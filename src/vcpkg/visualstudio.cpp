@@ -89,7 +89,14 @@ namespace vcpkg::VisualStudio
         const auto& program_files_32_bit = get_program_files_32_bit().value_or_exit(VCPKG_LINE_INFO);
 
         // Instances from vswhere
-        const Path vswhere_exe = program_files_32_bit / "Microsoft Visual Studio" / "Installer" / "vswhere.exe";
+        Path vswhere_exe = program_files_32_bit / "Microsoft Visual Studio" / "Installer" / "vswhere.exe";
+
+        auto maybe_vswhere = get_environment_variable("VCPKG_VSWHERE_PATH");
+        if (const auto path_as_string = maybe_vswhere.get())
+        {
+            vswhere_exe = *path_as_string;
+        }
+
         if (fs.exists(vswhere_exe, IgnoreErrors{}))
         {
             auto output = flatten_out(cmd_execute_and_capture_output(Command(vswhere_exe)
